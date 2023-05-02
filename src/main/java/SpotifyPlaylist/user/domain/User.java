@@ -28,6 +28,8 @@ public class User {
 
     private String nickname; // 사용자의 별명
 
+    private String oneLineIntroduction; // 유저 한 줄 소개
+
     private String profileImage; //  사용자 프로필 이미지의 URL
 
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
