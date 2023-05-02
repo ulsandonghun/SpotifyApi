@@ -1,9 +1,12 @@
 package SpotifyPlaylist.user.domain;
 
+import SpotifyPlaylist.playlist.domain.Playlist;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,5 +29,8 @@ public class User {
     private String nickname; // 사용자의 별명
 
     private String profileImage; //  사용자 프로필 이미지의 URL
+
+    @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
+    private List<Playlist> userPlaylist = new ArrayList<>();
 
 }
