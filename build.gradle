@@ -16,6 +16,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -31,9 +32,4 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-allprojects {
-	repositories {
-		maven { url 'https://jitpack.io' }
-	}
 }
