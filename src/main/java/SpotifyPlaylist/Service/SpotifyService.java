@@ -1,77 +1,59 @@
 package SpotifyPlaylist.Service;
 
+import SpotifyPlaylist.DTO.SearchResponseDto;
+import SpotifyPlaylist.DTO.DtoMapper;
+import SpotifyPlaylist.SpotifyConfig;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.hc.core5.http.ParseException;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
-import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
-import se.michaelthelin.spotify.model_objects.specification.Artist;
+import se.michaelthelin.spotify.model_objects.specification.AlbumSimplified;
+import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
+import se.michaelthelin.spotify.model_objects.specification.Image;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
-import se.michaelthelin.spotify.model_objects.specification.TrackSimplified;
-import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
-import se.michaelthelin.spotify.requests.data.search.simplified.SearchArtistsRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
-
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SpotifyService {
+    SpotifyApi spotifyApi = new SpotifyApi.Builder()
+            .setAccessToken(SpotifyConfig.accessToken())
+            //accessToken()은 SpotifyConfig 에서 발급함
+            .build();
 
-    @Value("f44ba55629874250bddde56310980a50")
-    private String clientId;
+    public List<SearchResponseDto> search(String keyword) {
+        List <SearchResponseDto> searchResponseDtoList = new ArrayList<>();
 
-    @Value("c7446a870f4b4e399078cc75eb30b5fd")
-    private String clientSecret;
+        try {
+            SearchTracksRequest searchTrackRequest = spotifyApi.searchTracks(keyword)
+                    .limit(10)
+                    .build();
 
-    private String accessToken;
+            Paging<Track> searchResult = searchTrackRequest.execute();
+            Track[] tracks = searchResult.getItems();
 
-    private SpotifyApi getSpotifyApi() {
-        return new SpotifyApi.Builder()
-                .setClientId(clientId)
-                .setClientSecret(clientSecret)
-                .setAccessToken(accessToken)
-                .build();
-    }
+            for (Track track : tracks) {
+                String title = track.getName();
 
-    public void authenticate() throws IOException, ParseException, SpotifyWebApiException {
-        final SpotifyApi spotifyApi = getSpotifyApi();
-        final ClientCredentialsRequest clientCredentialsRequest = spotifyApi.clientCredentials().build();
-        final ClientCredentials clientCredentials = clientCredentialsRequest.execute();
-        accessToken = clientCredentials.getAccessToken();
-    }
+                AlbumSimplified album = track.getAlbum();
+                ArtistSimplified[] artists = album.getArtists();
+                String artistName = artists[0].getName();
 
-    public List<Track> searchTracksByArtist(String artistName) throws IOException, ParseException, SpotifyWebApiException {
-        if (accessToken == null) {
-            authenticate();
+
+                Image[] images = album.getImages();
+                String imageUrl = (images.length > 0) ? images[0].getUrl() : "NO_IMAGE";
+
+                String albumName = album.getName();
+
+                searchResponseDtoList.add(DtoMapper.toSearchDto(artistName, title, albumName, imageUrl));
+            }
+
+        } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
+            System.out.println("Error: " + e.getMessage());
         }
-
-        final SpotifyApi spotifyApi = getSpotifyApi();
-        SearchTracksRequest searchTracksRequest = spotifyApi.searchTracks("artist:" + artistName).build();
-        Track[] tracks = searchTracksRequest.execute().getItems();
-
-        return Arrays.stream(tracks).collect(Collectors.toList());
+        return searchResponseDtoList;
     }
-
-    public List<Artist> searchArtists(String artistName) throws IOException, ParseException, SpotifyWebApiException {
-        if (accessToken == null) {
-            authenticate();
-        }
-        final SpotifyApi spotifyApi = getSpotifyApi();
-        SearchArtistsRequest searchArtistsRequest = spotifyApi.searchArtists(artistName).build();
-        Artist[] artists = searchArtistsRequest.execute().getItems();
-
-        return Arrays.stream(artists).collect(Collectors.toList());
-    }
-
-
 
 }

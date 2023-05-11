@@ -1,6 +1,6 @@
-package SpotifyPlaylist.spotifyconfig;
+package SpotifyPlaylist.DTO;
 
-import SpotifyPlaylist.spotifyconfig.DTO.SearchResponseDto;
+import SpotifyPlaylist.DTO.SearchResponseDto;
 
 public class DtoMapper {
 

@@ -1,4 +1,4 @@
-package SpotifyPlaylist.spotifyconfig;
+package SpotifyPlaylist;
 
 import java.io.IOException;
 import se.michaelthelin.spotify.SpotifyApi;
