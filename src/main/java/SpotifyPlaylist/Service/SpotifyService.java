@@ -28,7 +28,7 @@ public class SpotifyService {
 
         try {
             SearchTracksRequest searchTrackRequest = spotifyApi.searchTracks(trackname)
-                    .limit(10)
+                    .limit(1)
                     .build();
 
             Paging<Track> searchResult = searchTrackRequest.execute();
@@ -61,7 +61,7 @@ public class SpotifyService {
         List <SearchResponseDto> searchResponseDtoList = new ArrayList<>();
 
         try {
-            SearchTracksRequest searchTrackRequest = spotifyApi.searchTracks("track:" + trackname + " artist:" + Artist)
+            SearchTracksRequest searchTrackRequest = spotifyApi.searchTracks("track:" + trackname + " artist:" + Artist )
                     .limit(10)
                     .build();
 
